@@ -1,6 +1,6 @@
 import java.util.Locale;
 
-public class CountryService {
+public class CountryServiceStep1 {
 
     public static void getCountry(String code) {
         System.out.println("Hello Country Service");
