@@ -6,6 +6,6 @@ public class CountryServiceStep1 {
         System.out.println("Hello Country Service");
 
         Locale country = new Locale("English", code);
-        System.out.println("country: " + country.getDisplayCountry());
+        System.out.println("country step1: " + country.getDisplayCountry());
     }
 }
