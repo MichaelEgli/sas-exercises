@@ -17,7 +17,7 @@ public class CountryServiceStep2 {
 
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
-        System.out.println("country step2 response: " + response.body());
+        System.out.println("Country step2 response: " + response.body());
 
     }
 }
