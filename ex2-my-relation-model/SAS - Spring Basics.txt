@@ -1,0 +1,128 @@
+1. Spring Framework
+
+Konzepte (Container, Komponenten, Kontexte, Injection, Auto-Configuration)
+Technologien (Remoting, Data Access, Configuration, Integration)
+
+--
+Spring Boot ist eines der beliebtesten Frameworks für die Entwicklung von Java-Anwendungen. Sein Kern basiert auf zwei grundlegenden Konzepten: Dependency Injection (DI) und Inversion of Control (IoC) .
+
+IoC is a principle (Konzept). Du gibst die Kontrolle über das Managen der "klassenübergreifenden Objektverwendung" an Spring. DI (Dependency Injection) ist die Implementierung/Design Pattern von IoC in Spring.
+
+Bean
+- A bean is an instance of a class managed by the Spring container
+
+Container
+- Part of the core of the Spring Framework
+- Responsible for managing all the beans
+- Performs dependency injection
+
+Annotation Bean vs Component
+Bean is a method level annotation
+Component, Controller, Repository, etc. are class level annotations
+
+The spring application context represents the Spring IoC container and is responsible for instantiating, configuring, and assembling the beans.
+Ein IoC-Container (Inversion of Control-Container) ist eine Komponente eines Software-Frameworks, die die Erstellung und den Lebenszyklus von Objekten (oft als Beans bezeichnet) übernimmt und ihre Abhängigkeiten über Dependency Injection (DI) verwaltet.
+
+AutoConfiguration
+In Spring musste viel manuell konfiguriert werden. z.B. musste man eine Klasse mit @PropertySource(value={"classpath:application.properties"} erzeugen und die Properties dort definieren.
+Mit SpringBoot wurde eine Default-Konfiguration definiert. Sprint Boot schaut, solange nichts anderes definiert, automatisch ob es eine Datei application.properties gibt.
+z.B. auch automatisch welche ports verwendet werden
+
+
+2. Persistence
+
+Entities, Entity Manager, Persistence Context
+O/R-Mapping, Entity Relationships
+Abfragen mit JPQL
+Spring Data JPA Repositories
+Testcontainers
+
+Es gibt verschiedene Wege/Konzepte um der Persistence Layer in Spring zu implementieren
+- Hibernate
+- JPA
+- Spring Data
+
+JDBC ist eine Datenbankschnittstelle der Java-Plattform, die eine einheitliche Schnittstelle zu relationalen Datenbanken bietet.
+
+Hibernate ist ein ORM-Tool (Object Relation Model)
+JPA ist ein Standard, Hibernate implementiert diesen.
+Dies ermöglicht (einfacher) das ORM-Tool zu wechseln (z.B. von Hibernate auf EclipseLink).
+
+Welches Problem löst Hibernate?
+Datentransfer/Mapping zwischenDB-Tabelle "USER" und (Java-)Objekt USER (Klasse)
+@Entity in Klasse (Dependency = hibernate-core, Hipernate verwendet da bereits JPA respektive Jakarta imports)
+Falls Klasse und Tabellenname unterschiedlich sind, wird @Table(name = "USERS") verwendet (Tabelle = USERS, class = USER)
+Hibernate muss wissen was der Primary-Key ist. Dies wird in der Klasse bei der Variable (z.B. für private Loing userId) mit folgenden Annotations gemacht: 
+@Id
+@GeneratedValue(strategy = GenrationType.IDENTITY)
+
+Falls Column-Name und Objekt-Variable nicht gleich heissen (Column-Name in DB = BIRTH_DATE, in Java Klasse = birthDate):
+@Colunm(name = "birth_day")
+private LocalDate birthDate;
+
+Hibernate braucht einen empty Constructor um Daten zu fetchen (abrufen):
+public User() {
+}
+Hibernate hat eine eigene Query-Language "HQL". Dies orientiert sich nach Klassenhierarchie. Pure SQL works on tabels.
+Man würde dann schreiben:
+List<User> users = session.createQuery("select u.birthDate from User u", User.class); (SQL wäre Tabellen orientiert: select u.BIRTH_DATE from USERS)
+
+JPA (Jakarta Persistence API, früher Java Persistence API)
+Eine Schnittstelle für Java-Anwwendungen, die die Zuordnung und Uebertragung von Objekten zu Datenbankeinträgen vereinfacht.
+Hibernate verwendet SessionFactory um Datenbank-Verbindungen aufzubauen, Transaktionen auszuführen und Verbindungen wieder zu schliessen. JPA macht dies über Entity Manager.
+JPA verwendet JPQL (Java Persistence Query Language), was ein Subset von HQL ist.
+final StandardServiceRegistry registry = new StandardServiceRegistryBuilder().coinfigure().build();
+emf = new MetadataSources(registry).buildMetadata().buildSessionsFactory();  // Persistence Provider ist weiterhin Hibernate
+EntityManager em = emf.createEntityManager();
+List<User> users = em.createQuery("select u from User u", User.class).getResultList();
+
+Grundsätzlich entwickelt man gegen JPA und wenn man Hibernate spezifisch was darauf braucht, dann Hibernate.
+
+criteria_api
+criteriaQuery sind grundsätzlich SQLs mit where Klauseln
+
+EntityManager em = emf.createEntityManager();
+CriteriaBuilder db = em.getCriterialBuilder();
+
+CriteriaQuery<User> criteriaQuery = cb.createQuery(User.class);
+Root<User> root = criteriaQuery.from(User.class);
+criteriaQuery.select(root).where(cb.equal(root.get(User_.NAME), "marco"));
+
+Kontext zu Spring-Boot (Spring Data)
+1.) Anstatt das wir hibernate.cfg.xml oder java-persistence.cfg (für EntityManager etc.) konfigurieren ist das Teil von application.properties und wird Spring Boot
+den EntityManager für uns erstellen (quasi managed die Infrastructure....)
+2.) Mit SpringBoot würden nicht nicht Code wie "getTransaction().begin() etc. verwenden. Wir würden die @Transactional Annotation verwenden, worüber das Oeffnen, Schliessen der DB-Verbindungen, Handling der Transactions durch Spring Boot erledigt wird.
+3.) Repositories: dadurch wird ein Interface mit Methoden auf die Tabellen bereitgestellt. Somit kein Query-Bauen...
+interface UserRepository {
+	List <User> findByName(String name); }
+
+SQL Dialects braucht es um SQL für unterschiedliche UseCases oder System-Architekturen zu optimieren: MySQL, PostgreSQL, SQLite, etc.
+
+
+
+3. Spring Core
+
+Spring Beans, Scopes, Dependency Injection
+Transaction Management
+Aspect-oriented Programming
+Messaging mit JMS und AMQP
+
+DI:
+@Autowiring (Instanzvariablen)
+
+In case of confusion: @Primary
+Oder @Qualifier("laptop")
+
+Confusion bedeutet. Es gibt z.B. ein Klasse resp. Interface Computer. Daraus extended eine Klasse Laptop und Desktop. In beiden Klassen gibt es eine Methode "do_compile".
+Jetzt, wenn man ein Klasse "Developer" erzeugt und dort ein Computer instanziert, ist es ja für Spring nicht klar, ob Laptop oder Desktop gemeineint ist.
+Setzt man jetzt z.B. bei der Klasse Laptop die Annotation "Primary", wird Spring diese Klasse verwenden.
+Alternativ könnte man in der Klasse Developer bei der Instanzvariable Computer die Annotation Qualifier("laptop") verwenden um die Confusion zu lösen.
+
+
+
+4. Spring Web
+
+HTML-Rendering mit Thymeleaf
+Implementierung von REST-Services und -Clients
+Error Handling, Message Converter, Filters, Bean Validation
+Testing und Dokumentation
