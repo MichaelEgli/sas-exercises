@@ -6,6 +6,7 @@
       <list>
         <option value="$PROJECT_DIR$/01-spring-profiles/pom.xml" />
         <option value="$PROJECT_DIR$/ex2-my-relation-model/pom.xml" />
+        <option value="$PROJECT_DIR$/bookstore/order/pom.xml" />
       </list>
     </option>
   </component>
