@@ -1,8 +1,8 @@
 package ch.bfh.eglim8.spring.hello;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -12,11 +12,11 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(classes = ConfigExerciseApplication.class)
 public class HelloServiceTest {
 
-    @Autowired
-    private HelloService helloService;
-
     @Mock
     private GreetingService greetingService;
+
+    @InjectMocks
+    private HelloService helloService;
 
     @Test
     public void testHelloService() {
@@ -30,10 +30,11 @@ public class HelloServiceTest {
     }
 
     @Test
-    public void testGreetingService() {
-        Mockito.when(greetingService.getGreeting()).thenReturn("gugus");
+    public void testGreetingServiceWithMock() {
+        when(greetingService.getGreeting()).thenReturn("mocked evening");
+
         String resultNewie = helloService.sayHello("Michael", 79);
-        System.out.println(resultNewie);
+        assertThat(resultNewie).contains("mocked evening");
     }
 
     @Test
