@@ -2,6 +2,7 @@ package ch.bfh.eglim8.spring.hello;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
@@ -14,6 +15,9 @@ public class HelloServiceIT {
     @Autowired
     private HelloService helloService;
 
+    @Value("${times-of-day.morning}")
+    String morning;
+
     @Test
     public void testHelloService() {
         assertThat(helloService).isNotNull();
@@ -21,6 +25,7 @@ public class HelloServiceIT {
         String resultNewie = helloService.sayHello("Michael", 79);
         System.out.println(resultNewie);
         assert resultNewie.contains("evening");
+        System.out.println(morning);
     }
 
     @Test
