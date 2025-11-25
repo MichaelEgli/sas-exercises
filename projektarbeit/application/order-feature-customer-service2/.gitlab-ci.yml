@@ -1,0 +1,44 @@
+stages:
+  - test
+
+include:
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
+
+image: maven:3.9.11-eclipse-temurin-25
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  MAVEN_CLI_OPTS: "-B -ntp"
+  TEST_DIR: "./src/test"
+  POSTGRES_DB: testdb
+  POSTGRES_USER: testuser
+  POSTGRES_PASSWORD: testpass
+  SPRING_PROFILES_ACTIVE: gitlab
+
+unit-test:
+  stage: test
+  services:
+    - name: postgres:17.6-alpine
+      alias: postgres
+  script:
+    - mvn $MAVEN_CLI_OPTS test
+  artifacts:
+    reports:
+      junit: target/surefire-reports/*.xml
+    paths:
+      - target/surefire-reports/
+    expire_in: 1 week
+
+integration-test:
+  stage: test
+  services:
+    - name: postgres:17.6-alpine
+      alias: postgres
+  script:
+    - mvn $MAVEN_CLI_OPTS verify
+  artifacts:
+    reports:
+      junit: target/failsafe-reports/*.xml
+    paths:
+      - target/failsafe -reports/
+    expire_in: 1 week
