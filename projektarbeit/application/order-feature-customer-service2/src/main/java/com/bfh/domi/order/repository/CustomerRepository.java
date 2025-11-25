@@ -12,6 +12,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     // Query 1: Finde den Kunden (Customer) mit einer bestimmten E-Mail-Adresse
     Optional<Customer> findByEmail(String email);
 
+    List<CustomerInfo> findCustomersByEmail(String email);
+
     // Query 2: Finde Informationen (CustomerInfo) zu allen Kunden, deren Vor- oder Nachname
     // einen bestimmten Namen enthält. Gross-/Kleinschreibung soll ignoriert werden.
     List<CustomerInfo> findAllByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(String firstNameFragment, String lastNameFragment);
