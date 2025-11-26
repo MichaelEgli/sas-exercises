@@ -1,0 +1,21 @@
+
+Windows User Browser: Admin/admin
+http://localhost:8161/admin/index.jsp
+
+Run the ActiveMQ Classic message broker:
+docker run --name activemq -p 8161:8161 -p 61616:61616 -d apache/activemq-classic
+
+Create a Spring application with the starters spring-boot-starter-activemq and spring-boot-starter-json as dependencies.
+Define application properties that provide the URL of the ActiveMQ Classic message broker and enable the publish-subscribe domain:
+spring.activemq.broker-url=tcp://localhost:61616
+spring.jms.pub-sub-domain=true
+Implement a publisher and a listener component that allow a user to send text messages to and receive text messages from the topic ChatTopic.
+Add a property user to the messages that identifies the sender of the message and display it.
+Define a message selector such that the sender's own messages are not received.
+
+
+---
+
+Define a ChatMessage class with a user and a text property.
+// optional: Implement a message converter that automatically converts chat messages from and to CSV.
+Configure the JacksonJsonMessageConverter with the typeId property set to chat such that chat messages are converted from and to JSON.ure the MappingJackson2MessageConverter such that the chat messages are converted from and to JSON.
