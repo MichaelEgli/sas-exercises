@@ -149,4 +149,157 @@ public class CustomerServiceIT {
 
     }
 
+    @Test
+    public void updateCustomer() {
+
+        String FIRSTNAME = "Anna";
+        String LASTNAME = "Schmidt";
+        String CREDIT_CARD = "4111 1111 1111 1111";
+        String ADDRESS_COUNTRY = "Switzerland";
+
+        // Customer
+        Address address = new Address();
+        address.setStreet("Grabmattweg 16");
+        address.setStateProvince("BE");
+        address.setPostalCode("3176");
+        address.setCity("Neuenegg");
+        address.setCountry(ADDRESS_COUNTRY);
+
+        CreditCard creditCard = new CreditCard();
+        creditCard.setType(CreditCardType.VISA);
+        creditCard.setNumber(CREDIT_CARD);
+        creditCard.setExpirationMonth(12);
+        creditCard.setExpirationYear(2026);
+
+        Customer customer = new Customer();
+        customer.setId(VALID_CUSTOMER_ID);
+        customer.setFirstName(FIRSTNAME);
+        customer.setLastName(LASTNAME);
+        customer.setEmail("anna.schmidt@example.com");
+        customer.setAddress(address);
+        customer.setCreditCard(creditCard);
+
+        var customerAddressBeforeUpdate = customerService.findCustomer(VALID_CUSTOMER_ID);
+
+        assertThat(customerAddressBeforeUpdate.getAddress().getCity()).isEqualTo("Zurich");
+
+        var customerAddressAfterUpdate = customerService.updateCustomer(customer);
+        assertThat(customerAddressAfterUpdate.getAddress().getCity()).isEqualTo("Neuenegg");
+
+
+    }
+
+    @Test
+    public void updateCustomerNotExisting() {
+
+        String FIRSTNAME = "Anna";
+        String LASTNAME = "Schmidt";
+        String CREDIT_CARD = "4111 1111 1111 1111";
+        String ADDRESS_COUNTRY = "Switzerland";
+
+        // Customer
+        Address address = new Address();
+        address.setStreet("Grabmattweg 16");
+        address.setStateProvince("BE");
+        address.setPostalCode("3176");
+        address.setCity("Neuenegg");
+        address.setCountry(ADDRESS_COUNTRY);
+
+        CreditCard creditCard = new CreditCard();
+        creditCard.setType(CreditCardType.VISA);
+        creditCard.setNumber(CREDIT_CARD);
+        creditCard.setExpirationMonth(12);
+        creditCard.setExpirationYear(2026);
+
+        Customer customer = new Customer();
+        customer.setId(INVALID_CUSTOMER_ID);
+        customer.setFirstName(FIRSTNAME);
+        customer.setLastName(LASTNAME);
+        customer.setEmail("anna.schmidt@example.com");
+        customer.setAddress(address);
+        customer.setCreditCard(creditCard);
+
+        assertThatThrownBy(() -> customerService.findCustomer(INVALID_CUSTOMER_ID))
+            .isInstanceOf(CustomerNotFoundException.class)
+            .hasMessageContaining("Customer with id 99999 not found");
+
+    }
+
+    @Test
+    public void updateCustomerEmailAlreadyExists() {
+
+        String EMAIL_ALREADY_EXISTS_DIFFERENT_CUSTOMER = "susi.mueller@example.com";
+
+        String FIRSTNAME = "Anna";
+        String LASTNAME = "Schmidt";
+        String CREDIT_CARD = "4111 1111 1111 1111";
+        String ADDRESS_COUNTRY = "Switzerland";
+
+        // Customer
+        Address address = new Address();
+        address.setStreet("Grabmattweg 16");
+        address.setStateProvince("BE");
+        address.setPostalCode("3176");
+        address.setCity("Neuenegg");
+        address.setCountry(ADDRESS_COUNTRY);
+
+        CreditCard creditCard = new CreditCard();
+        creditCard.setType(CreditCardType.VISA);
+        creditCard.setNumber(CREDIT_CARD);
+        creditCard.setExpirationMonth(12);
+        creditCard.setExpirationYear(2026);
+
+        Customer customer = new Customer();
+        customer.setId(VALID_CUSTOMER_ID); //
+        customer.setFirstName(FIRSTNAME);
+        customer.setLastName(LASTNAME);
+        customer.setEmail(EMAIL_ALREADY_EXISTS_DIFFERENT_CUSTOMER);
+        customer.setAddress(address);
+        customer.setCreditCard(creditCard);
+
+        assertThatThrownBy(() -> customerService.updateCustomer(customer))
+            .isInstanceOf(EmailAlreadyExistsException.class)
+            .hasMessageContaining("Email already exists");
+
+    }
+
+    @Test
+    public void updateCustomerCanUpdateHisOwnEmail() {
+
+        String UPDATE_EMAIL_SAME_CUSTOMER = "anna2.schmidt@example.com";
+        String FIRSTNAME = "Anna";
+        String LASTNAME = "Schmidt";
+        String CREDIT_CARD = "4111 1111 1111 1111";
+        String ADDRESS_COUNTRY = "Switzerland";
+
+        // Customer
+        Address address = new Address();
+        address.setStreet("Grabmattweg 16");
+        address.setStateProvince("BE");
+        address.setPostalCode("3176");
+        address.setCity("Neuenegg");
+        address.setCountry(ADDRESS_COUNTRY);
+
+        CreditCard creditCard = new CreditCard();
+        creditCard.setType(CreditCardType.VISA);
+        creditCard.setNumber(CREDIT_CARD);
+        creditCard.setExpirationMonth(12);
+        creditCard.setExpirationYear(2026);
+
+        Customer customer = new Customer();
+        customer.setId(VALID_CUSTOMER_ID);
+        customer.setFirstName(FIRSTNAME);
+        customer.setLastName(LASTNAME);
+        customer.setEmail(UPDATE_EMAIL_SAME_CUSTOMER);
+        customer.setAddress(address);
+        customer.setCreditCard(creditCard);
+
+        var customerEmailBeforeUpdate = customerService.findCustomer(VALID_CUSTOMER_ID);
+        assertThat(customerEmailBeforeUpdate.getEmail().equals("anna.schmidt@example.com"));
+
+        var customerEmailAfterUpdate = customerService.updateCustomer(customer);
+        assertThat(customerEmailAfterUpdate.getEmail().equals(UPDATE_EMAIL_SAME_CUSTOMER));
+
+    }
+
 }
