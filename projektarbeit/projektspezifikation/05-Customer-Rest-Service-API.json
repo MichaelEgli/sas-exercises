@@ -1,0 +1,469 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Customer API",
+    "description": "Customer REST API Documentation",
+    "version": "1.0"
+  },
+  "paths": {
+    "/customers": {
+      "post": {
+        "description": "Register a customer",
+        "requestBody": {
+          "description": "the customer data (identifier must be null)",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Customer"
+              },
+              "example": {
+                "firstName": "Alice",
+                "lastName": "Smith",
+                "email": "alice@example.org",
+                "address": {
+                  "street": "123 Maple Street",
+                  "city": "Mill Valley",
+                  "stateProvince": "CA",
+                  "postalCode": "90952",
+                  "country": "US"
+                },
+                "creditCard": {
+                  "type": "MASTER_CARD",
+                  "number": "5400000000000005",
+                  "expirationMonth": 1,
+                  "expirationYear": 2030
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "customer registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                },
+                "example": {
+                  "id": 215,
+                  "firstName": "Alice",
+                  "lastName": "Smith",
+                  "email": "alice@example.org",
+                  "address": {
+                    "street": "123 Maple Street",
+                    "city": "Mill Valley",
+                    "stateProvince": "CA",
+                    "postalCode": "90952",
+                    "country": "US"
+                  },
+                  "creditCard": {
+                    "type": "MASTER_CARD",
+                    "number": "5400000000000005",
+                    "expirationMonth": 1,
+                    "expirationYear": 2030
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid customer data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": {
+                  "status": 400,
+                  "title": "Bad Request",
+                  "detail": "Missing email address",
+                  "instance": "/customers/123"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "email address already used by another customer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": {
+                  "status": 409,
+                  "title": "Conflict",
+                  "detail": "Email 'alice@example.org' already used",
+                  "instance": "/customers"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "Search for customers",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "the name to search for",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "smith"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "search successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customers/{id}": {
+      "get": {
+        "description": "Find a customer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "the customer identifier",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 217
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "customer found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                },
+                "example": {
+                  "id": 217,
+                  "firstName": "Alice",
+                  "lastName": "Smith",
+                  "email": "alice@example.org",
+                  "address": {
+                    "street": "123 Maple Street",
+                    "city": "Mill Valley",
+                    "stateProvince": "CA",
+                    "postalCode": "90952",
+                    "country": "US"
+                  },
+                  "creditCard": {
+                    "type": "MASTER_CARD",
+                    "number": "5400000000000005",
+                    "expirationMonth": 1,
+                    "expirationYear": 2030
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "customer not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": {
+                  "status": 404,
+                  "title": "Not Found",
+                  "detail": "Customer 217 not found",
+                  "instance": "/customers/217"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "description": "Update a customer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "the customer identifier",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 215
+          }
+        ],
+        "requestBody": {
+          "description": "the new customer data (identifier must match path parameter)",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Customer"
+              },
+              "example": {
+                "id": 215,
+                "firstName": "Alice",
+                "lastName": "Smith",
+                "email": "smith@example.org",
+                "address": {
+                  "street": "123 Maple Street",
+                  "city": "Mill Valley",
+                  "stateProvince": "CA",
+                  "postalCode": "90952",
+                  "country": "US"
+                },
+                "creditCard": {
+                  "type": "MASTER_CARD",
+                  "number": "5400000000000005",
+                  "expirationMonth": 1,
+                  "expirationYear": 2030
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "customer updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                },
+                "example": {
+                  "id": 215,
+                  "firstName": "Alice",
+                  "lastName": "Smith",
+                  "email": "smith@example.org",
+                  "address": {
+                    "street": "123 Maple Street",
+                    "city": "Mill Valley",
+                    "stateProvince": "CA",
+                    "postalCode": "90952",
+                    "country": "US"
+                  },
+                  "creditCard": {
+                    "type": "MASTER_CARD",
+                    "number": "5400000000000005",
+                    "expirationMonth": 1,
+                    "expirationYear": 2030
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid customer data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": {
+                  "status": 400,
+                  "title": "Bad Request",
+                  "detail": "Identifier not matching",
+                  "instance": "/customer/215"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "customer not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": {
+                  "status": 404,
+                  "title": "Not Found",
+                  "detail": "Customer 215 not found",
+                  "instance": "/customers/215"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "email address to be changed already used by another customer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": {
+                  "status": 409,
+                  "title": "Conflict",
+                  "detail": "Email 'alice@example.org' already used",
+                  "instance": "/customers/215"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Customer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "creditCard": {
+            "$ref": "#/components/schemas/CreditCard"
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "email",
+          "address",
+          "creditCard"
+        ]
+      },
+      "CustomerInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "id",
+          "firstName",
+          "lastName",
+          "email"
+        ]
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "stateProvince": {
+            "type": "string"
+          },
+          "postalCode": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "street",
+          "city",
+          "postalCode",
+          "country"
+        ]
+      },
+      "CreditCard": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "MASTER_CARD",
+              "VISA"
+            ]
+          },
+          "number": {
+            "type": "string",
+            "pattern": "\\d{16}"
+          },
+          "expirationMonth": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "expirationYear": {
+            "type": "integer",
+            "minimum": 2000
+          }
+        },
+        "required": [
+          "type",
+          "number",
+          "expirationMonth",
+          "expirationYear"
+        ]
+      },
+      "ProblemDetail": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          },
+          "instance": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "title"
+        ]
+      }
+    }
+  }
+}
