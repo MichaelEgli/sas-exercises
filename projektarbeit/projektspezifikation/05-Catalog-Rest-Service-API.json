@@ -1,0 +1,304 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Catalog API",
+    "description": "Catalog REST API Documentation",
+    "version": "1.0"
+  },
+  "paths": {
+    "/books": {
+      "post": {
+        "description": "Add a book",
+        "requestBody": {
+          "description": "the book data",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Book"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "book added",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Book"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid book data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": {
+                  "status": 400,
+                  "title": "Bad Request",
+                  "detail": "Missing book title",
+                  "instance": "/books"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "book with same ISBN already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": {
+                  "status": 409,
+                  "title": "Conflict",
+                  "detail": "Book with ISBN 0764574833 already exists",
+                  "instance": "/books"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "Search for books",
+        "parameters": [
+          {
+            "name": "keywords",
+            "in": "query",
+            "description": "comma-separated list of keywords to search for",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "spring,boot"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "search successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "the books that match the keywords",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Book"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/books/{isbn}": {
+      "get": {
+        "description": "Find a book",
+        "parameters": [
+          {
+            "name": "isbn",
+            "in": "path",
+            "description": "the ISBN of the book",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "0764574833"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "book found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Book"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "book not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": {
+                  "status": 404,
+                  "title": "Not Found",
+                  "detail": "Book with ISBN 0764574833 not found",
+                  "instance": "/books/0764574833"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "description": "Update a book",
+        "parameters": [
+          {
+            "name": "isbn",
+            "in": "path",
+            "description": "the ISBN of the book",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "0764574833"
+          }
+        ],
+        "requestBody": {
+          "description": "the new book data (ISBN must match path parameter)",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Book"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "book updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Book"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid book data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": {
+                  "status": 400,
+                  "title": "Bad Request",
+                  "detail": "ISBN not matching",
+                  "instance": "/books/0764574833"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "book not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": {
+                  "status": 404,
+                  "title": "Not Found",
+                  "detail": "Book with ISBN 0764574833 not found",
+                  "instance": "/books/0764574833"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Book": {
+        "type": "object",
+        "properties": {
+          "isbn": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 13
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "subtitle": {
+            "type": "string"
+          },
+          "authors": {
+            "type": "string",
+            "minLength": 1
+          },
+          "publisher": {
+            "type": "string",
+            "minLength": 1
+          },
+          "publicationYear": {
+            "type": "integer",
+            "minimum": 1000
+          },
+          "numberOfPages": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "description": {
+            "type": "string"
+          },
+          "imageUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "isbn",
+          "title",
+          "authors",
+          "publisher",
+          "price"
+        ],
+        "example": {
+          "isbn": "0764574833",
+          "title": "Professional Java Development with the Spring Framework",
+          "authors": "Rod Johnson, Juergen Hoeller, et al.",
+          "publisher": "Wrox",
+          "publicationYear": 2005,
+          "numberOfPages": 676,
+          "price": 57.5
+        }
+      },
+      "ProblemDetail": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          },
+          "instance": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "title"
+        ]
+      }
+    }
+  }
+}

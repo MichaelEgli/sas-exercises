@@ -1,0 +1,195 @@
+asyncapi: 3.0.0
+
+info:
+  title: Shipping Service
+  version: '1.0'
+
+channels:
+  order:
+    address: 'OrderQueue'
+    messages:
+      ShippingOrder:
+        payload:
+          $ref: '#/components/schemas/ShippingOrder'
+  cancellation:
+    address: 'CancelQueue'
+    messages:
+      ShippingCancel:
+        payload:
+          $ref: '#/components/schemas/ShippingCancel'
+  information:
+    address: 'InfoQueue'
+    messages:
+      ShippingInfo:
+        payload:
+          $ref: '#/components/schemas/ShippingInfo'
+
+operations:
+  receiveShippingOrder:
+    action: 'receive'
+    channel:
+      $ref: '#/channels/order'
+  receiveShippingCancel:
+    action: 'receive'
+    channel:
+      $ref: '#/channels/cancellation'
+  sendShippingInfo:
+    action: 'send'
+    channel:
+      $ref: '#/channels/information'
+
+components:
+  schemas:
+    ShippingOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+        customer:
+          $ref: '#/components/schemas/Customer'
+        address:
+          $ref: '#/components/schemas/Address'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+      required:
+        - id
+        - customer
+        - address
+        - items
+      additionalProperties: false
+      example:
+        id: 8124
+        customer:
+          id: 157
+          firstName: 'Alice'
+          lastName: 'Smith'
+          email: 'smith@example.org'
+        address:
+          street: '123 Maple Street'
+          city: 'Mill Valley'
+          stateProvince: 'CA'
+          postalCode: '90952'
+          country: 'US'
+        items:
+          - book:
+              isbn: '0764574833'
+              title: 'Professional Java Development with the Spring Framework'
+              authors: 'Rod Johnson, Juergen Hoeller, et al.'
+              publisher: 'Wrox'
+            quantity: 1
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+      additionalProperties: false
+      example:
+        id: 157
+        firstName: 'Alice'
+        lastName: 'Smith'
+        email: 'smith@example.org'
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        stateProvince:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+      required:
+        - street
+        - city
+        - postalCode
+        - country
+      additionalProperties: false
+      example:
+        street: '123 Maple Street'
+        city: 'Mill Valley'
+        stateProvince: 'CA'
+        postalCode: '90952'
+        country: 'US'
+    OrderItem:
+      type: object
+      properties:
+        book:
+          $ref: '#/components/schemas/Book'
+        quantity:
+          type: integer
+      required:
+        - book
+        - quantity
+      additionalProperties: false
+      example:
+        book:
+          isbn: '0764574833'
+          title: 'Professional Java Development with the Spring Framework'
+          authors: 'Rod Johnson, Juergen Hoeller, et al.'
+          publisher: 'Wrox'
+        quantity: 1
+    Book:
+      type: object
+      properties:
+        isbn:
+          type: string
+          minLength: 10
+          maxLength: 10
+        title:
+          type: string
+        authors:
+          type: string
+        publisher:
+          type: string
+      required:
+        - isbn
+        - title
+        - authors
+        - publisher
+      additionalProperties: false
+      example:
+        isbn: '0764574833'
+        title: 'Professional Java Development with the Spring Framework'
+        authors: 'Rod Johnson, Juergen Hoeller, et al.'
+        publisher: 'Wrox'
+    ShippingInfo:
+      type: object
+      properties:
+        orderId:
+          type: integer
+        status:
+          type: string
+          enum: [PROCESSING, SHIPPED, CANCELED]
+      required:
+        - orderId
+        - status
+      additionalProperties: false
+      example:
+        orderId: 8124
+        status: PROCESSING
+    ShippingCancel:
+      type: object
+      properties:
+        orderId:
+          type: integer
+      required:
+        - orderId
+      additionalProperties: false
+      example:
+        orderId: 8124

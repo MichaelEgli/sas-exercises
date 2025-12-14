@@ -1,0 +1,574 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Order API",
+    "description": "Order REST API Documentation",
+    "version": "1.0"
+  },
+  "paths": {
+    "/orders": {
+      "post": {
+        "description": "Place an order",
+        "requestBody": {
+          "description": "the order data",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseOrder"
+              },
+              "example": {
+                "customerId": 215,
+                "items": [
+                  {
+                    "isbn": "0764574833",
+                    "quantity": 1
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "order placed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesOrder"
+                },
+                "example": {
+                  "id": 5028,
+                  "date": "2025-06-01T08:20:00",
+                  "amount": 57.5,
+                  "status": "ACCEPTED",
+                  "customer": {
+                    "id": 215,
+                    "firstName": "Alice",
+                    "lastName": "Smith",
+                    "email": "smith@example.org"
+                  },
+                  "address": {
+                    "street": "123 Maple Street",
+                    "city": "Mill Valley",
+                    "stateProvince": "CA",
+                    "postalCode": "90952",
+                    "country": "US"
+                  },
+                  "payment": {
+                    "date": "2025-06-01T08:20:00",
+                    "amount": 57.5,
+                    "creditCardNumber": "5400000000000005",
+                    "transactionId": "550e8400-e29b-11d4-a716-446655440000"
+                  },
+                  "items": [
+                    {
+                      "book": {
+                        "isbn": "0764574833",
+                        "title": "Professional Java Development with the Spring Framework",
+                        "authors": "Rod Johnson, Juergen Hoeller, et al.",
+                        "publisher": "Wrox",
+                        "price": 57.5
+                      },
+                      "quantity": 1
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid order data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": {
+                  "status": 400,
+                  "title": "Bad Request",
+                  "detail": "Missing item quantity",
+                  "instance": "/orders"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "customer or book not found or payment failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": {
+                  "status": 422,
+                  "title": "Payment Failed",
+                  "detail": "Invalid credit card number or type",
+                  "errorCode": "10527",
+                  "instance": "/orders"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "Search for orders",
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "query",
+            "description": "the customer identifier",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 215
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "description": "the year of the orders",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 2000
+            },
+            "example": 2025
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "search successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "the found orders",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderInfo"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 5014,
+                    "date": "2025-06-01T08:19:50",
+                    "amount": 57.5,
+                    "status": "CANCELED"
+                  },
+                  {
+                    "id": 5028,
+                    "date": "2025-06-01T08:20:00",
+                    "amount": 57.5,
+                    "status": "SHIPPED"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{id}": {
+      "get": {
+        "description": "Find an order",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "the order identifier",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 5028
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "order found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesOrder"
+                },
+                "example": {
+                  "id": 5028,
+                  "date": "2025-06-01T08:20:00",
+                  "amount": 57.5,
+                  "status": "SHIPPED",
+                  "customer": {
+                    "id": 215,
+                    "firstName": "Alice",
+                    "lastName": "Smith",
+                    "email": "smith@example.org"
+                  },
+                  "address": {
+                    "street": "123 Maple Street",
+                    "city": "Mill Valley",
+                    "stateProvince": "CA",
+                    "postalCode": "90952",
+                    "country": "US"
+                  },
+                  "payment": {
+                    "date": "2025-06-01T08:20:00",
+                    "amount": 57.5,
+                    "creditCardNumber": "5400000000000005",
+                    "transactionId": "550e8400-e29b-11d4-a716-446655440000"
+                  },
+                  "items": [
+                    {
+                      "book": {
+                        "isbn": "0764574833",
+                        "title": "Professional Java Development with the Spring Framework",
+                        "authors": "Rod Johnson, Juergen Hoeller, et al.",
+                        "publisher": "Wrox",
+                        "price": 57.5
+                      },
+                      "quantity": 1
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "order not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": {
+                  "status": 404,
+                  "title": "Not Found",
+                  "detail": "Order 5028 not found",
+                  "instance": "/orders/5028"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "Cancel an order",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "the order identifier",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 5028
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "order canceled"
+          },
+          "404": {
+            "description": "order not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": {
+                  "status": 404,
+                  "title": "Not Found",
+                  "detail": "Order 5028 not found",
+                  "instance": "/orders/5028"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "order already shipped",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                },
+                "example": {
+                  "status": 409,
+                  "title": "Conflict",
+                  "detail": "Order 5028 already shipped",
+                  "instance": "/orders/5028"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PurchaseOrder": {
+        "type": "object",
+        "properties": {
+          "customerId": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderItem"
+            }
+          }
+        },
+        "required": [
+          "customerId",
+          "items"
+        ]
+      },
+      "PurchaseOrderItem": {
+        "type": "object",
+        "properties": {
+          "isbn": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 13
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "isbn",
+          "quantity"
+        ]
+      },
+      "OrderInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACCEPTED",
+              "PROCESSING",
+              "SHIPPED",
+              "CANCELED"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "date",
+          "amount",
+          "status"
+        ]
+      },
+      "SalesOrder": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACCEPTED",
+              "PROCESSING",
+              "SHIPPED",
+              "CANCELED"
+            ]
+          },
+          "customer": {
+            "$ref": "#/components/schemas/CustomerInfo"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "payment": {
+            "$ref": "#/components/schemas/Payment"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderItem"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "date",
+          "amount",
+          "status",
+          "customer",
+          "address",
+          "payment",
+          "items"
+        ]
+      },
+      "CustomerInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "firstName",
+          "lastName",
+          "email"
+        ]
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "stateProvince": {
+            "type": "string"
+          },
+          "postalCode": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "street",
+          "city",
+          "postalCode",
+          "country"
+        ]
+      },
+      "Payment": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "creditCardNumber": {
+            "type": "string"
+          },
+          "transactionId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "amount",
+          "creditCardNumber",
+          "transactionId"
+        ]
+      },
+      "SalesOrderItem": {
+        "type": "object",
+        "properties": {
+          "book": {
+            "$ref": "#/components/schemas/Book"
+          },
+          "quantity": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "isbn",
+          "quantity"
+        ]
+      },
+      "Book": {
+        "type": "object",
+        "properties": {
+          "isbn": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 10
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "authors": {
+            "type": "string",
+            "minLength": 1
+          },
+          "publisher": {
+            "type": "string",
+            "minLength": 1
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "isbn",
+          "title",
+          "authors",
+          "publisher",
+          "price"
+        ]
+      },
+      "ProblemDetail": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "instance": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "title"
+        ]
+      }
+    }
+  }
+}
