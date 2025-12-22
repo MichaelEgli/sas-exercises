@@ -1,0 +1,16 @@
+Bei diesem Test wird placeOrder, cancelOrder übergreifend (vom Order Service zum Shipping Service) ausgeführt.
+
+Damit dieser Test im IntelliJ lokal ausgeführt werden kann.
+
+1.) IntelliJ Projekt-Fenster 1: Shipping Application im IntelliJ starten
+2.) IntelliJ Projekt-Fenster 2: ActiveMq starten (entweder im docker-compose.yml oder falls einmal über docker-compose.yml ausgeführt,
+kann der Container auch im Services-Fenster von IntelliJ gestartet werden)
+3.) OrderServiceE2eIT im Projekt-Fenster 2 (Order) starten
+
+Je nach Performance der lokalen Maschine, kann es sein, dass folgende Properties in den application.properties erhöht werden müssen:
+
+bookstore.shipping.processingtime=3000 (dies muss zusätzlich auch im Shipping Service erhöht werden, restart)
+bookstore.test.asyncprocessingtime=2000
+
+
+
