@@ -1,0 +1,12 @@
+services:
+  activemq:
+    image: apache/activemq-classic:6.2.0
+    container_name: activemq
+    ports:
+      - "61616:61616"  # OpenWire protocol (JMS)
+      - "8161:8161"    # Web Console
+    environment:
+      - ACTIVEMQ_ADMIN_LOGIN=admin
+      - ACTIVEMQ_ADMIN_PASSWORD=admin
+    restart: unless-stopped
+

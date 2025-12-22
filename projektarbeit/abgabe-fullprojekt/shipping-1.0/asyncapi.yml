@@ -1,0 +1,258 @@
+asyncapi: 3.0.0
+info:
+  title: Shipping Service API
+  version: 1.0.0
+  description: |
+    This service handles shipping orders by listening to order requests and cancellations,
+    processing them, and sending status updates back via JMS queues.
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  development:
+    host: localhost:61616
+    protocol: jms
+    description: Local ActiveMQ broker
+    tags:
+      - name: env:development
+
+defaultContentType: application/json
+
+channels:
+  OrderQueue:
+    address: OrderQueue
+    messages:
+      ShippingOrder:
+        $ref: '#/components/messages/ShippingOrder'
+    description: Queue for receiving shipping order requests
+
+  CancelQueue:
+    address: CancelQueue
+    messages:
+      CancelMessage:
+        $ref: '#/components/messages/CancelMessage'
+    description: Queue for receiving order cancellation requests
+
+  InfoQueue:
+    address: InfoQueue
+    messages:
+      ShippingInfo:
+        $ref: '#/components/messages/ShippingInfo'
+    description: Queue for publishing shipping status updates
+
+operations:
+  receiveShippingOrder:
+    action: receive
+    channel:
+      $ref: '#/channels/OrderQueue'
+    summary: Receive a new shipping order
+    description: |
+      Receives a shipping order from the OrderQueue, processes it, and sends status updates.
+      The processing includes:
+      1. Adding the order to the processing list
+      2. Sending a PROCESSING status update
+      3. Simulating shipping (3 seconds)
+      4. Sending a SHIPPED status update
+    messages:
+      - $ref: '#/channels/OrderQueue/messages/ShippingOrder'
+
+  receiveShippingCancel:
+    action: receive
+    channel:
+      $ref: '#/channels/CancelQueue'
+    summary: Receive a shipping cancellation request
+    description: |
+      Receives a cancellation request containing an order ID, removes the order from 
+      the processing list if found, and sends a CANCELED status update.
+    messages:
+      - $ref: '#/channels/CancelQueue/messages/CancelMessage'
+
+  sendShippingInfo:
+    action: send
+    channel:
+      $ref: '#/channels/InfoQueue'
+    summary: Send shipping status information
+    description: |
+      Sends shipping status updates to the InfoQueue. Status updates are sent when:
+      - An order starts processing (PROCESSING)
+      - An order is shipped (SHIPPED)
+      - An order is canceled (CANCELED)
+    messages:
+      - $ref: '#/channels/InfoQueue/messages/ShippingInfo'
+
+components:
+  messages:
+    ShippingOrder:
+      name: ShippingOrder
+      title: Shipping Order
+      summary: Complete shipping order with customer and item details
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/ShippingOrder'
+
+    CancelMessage:
+      name: CancelMessage
+      title: Cancel Order Message
+      summary: Order cancellation request containing order ID
+      contentType: text/plain
+      payload:
+        type: string
+        description: The order ID to cancel (sent as a plain text string)
+        example: "12345"
+
+    ShippingInfo:
+      name: ShippingInfo
+      title: Shipping Information
+      summary: Shipping status update message
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/ShippingInfo'
+
+  schemas:
+    ShippingOrder:
+      type: object
+      description: A shipping order containing customer information, delivery address, and items to ship
+      required:
+        - id
+        - customer
+        - address
+        - items
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the shipping order
+          example: 12345
+        customer:
+          $ref: '#/components/schemas/Customer'
+        address:
+          $ref: '#/components/schemas/Address'
+        items:
+          type: array
+          description: List of items to be shipped
+          items:
+            $ref: '#/components/schemas/Item'
+          minItems: 1
+
+    ShippingInfo:
+      type: object
+      description: Status information for a shipping order
+      required:
+        - orderId
+        - status
+      properties:
+        orderId:
+          type: integer
+          description: The order ID this status update refers to
+          example: 12345
+        status:
+          $ref: '#/components/schemas/ShippingStatus'
+
+    Customer:
+      type: object
+      description: Customer information
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+      properties:
+        id:
+          type: integer
+          description: Unique customer identifier
+          example: 1001
+        firstName:
+          type: string
+          description: Customer's first name
+          example: John
+        lastName:
+          type: string
+          description: Customer's last name
+          example: Doe
+        email:
+          type: string
+          format: email
+          description: Customer's email address
+          example: john.doe@example.com
+
+    Address:
+      type: object
+      description: Shipping address
+      required:
+        - street
+        - city
+        - stateProvince
+        - postalCode
+        - country
+      properties:
+        street:
+          type: string
+          description: Street address
+          example: 123 Main Street
+        city:
+          type: string
+          description: City name
+          example: Bern
+        stateProvince:
+          type: string
+          description: State or province
+          example: Bern
+        postalCode:
+          type: string
+          description: Postal/ZIP code
+          example: "3000"
+        country:
+          type: string
+          description: Country name
+          example: Switzerland
+
+    Item:
+      type: object
+      description: An item in a shipping order
+      required:
+        - book
+        - quantity
+      properties:
+        book:
+          $ref: '#/components/schemas/Book'
+        quantity:
+          type: integer
+          description: Number of copies to ship
+          minimum: 1
+          example: 2
+
+    Book:
+      type: object
+      description: Book information
+      required:
+        - isbn
+        - title
+        - author
+        - publisher
+      properties:
+        isbn:
+          type: string
+          description: International Standard Book Number
+          example: "978-3-16-148410-0"
+        title:
+          type: string
+          description: Book title
+          example: "Spring Boot in Action"
+        author:
+          type: string
+          description: Book author
+          example: "Craig Walls"
+        publisher:
+          type: string
+          description: Publisher name
+          example: "Manning Publications"
+
+    ShippingStatus:
+      type: string
+      description: Current status of the shipping order
+      enum:
+        - PROCESSING
+        - SHIPPED
+        - CANCELED
+      example: PROCESSING
+

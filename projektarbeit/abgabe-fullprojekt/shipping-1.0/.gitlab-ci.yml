@@ -1,0 +1,115 @@
+stages:
+  - test
+  - package
+  - build
+
+include:
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
+
+image: maven:3.9.11-eclipse-temurin-25
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  MAVEN_CLI_OPTS: "-B -ntp"
+  TEST_DIR: "./src/test"
+  SPRING_PROFILES_ACTIVE: gitlab
+#  CI_DEBUG_SERVICES: "true"
+
+unit-test:
+  stage: test
+  script:
+    - mvn $MAVEN_CLI_OPTS test
+  artifacts:
+    reports:
+      junit: target/surefire-reports/*.xml
+    paths:
+      - target/surefire-reports/
+    expire_in: 1 week
+
+integration-test:
+  stage: test
+  services:
+    - name: apache/activemq-classic:6.2.0
+      alias: activemq
+      variables:
+        # Override image defaults so the final JVM args use tmpfs
+        ACTIVEMQ_DATA: "/dev/shm"
+        KAHADB_DIRECTORY: "/dev/shm/kahadb"
+        ACTIVEMQ_OPTS: "-Dactivemq.store.maxStoreUsage=48mb -Dactivemq.store.maxTempUsage=48mb"
+  script:
+    - mvn $MAVEN_CLI_OPTS verify
+  artifacts:
+    reports:
+      junit: target/failsafe-reports/*.xml
+    paths:
+      - target/failsafe-reports/
+    expire_in: 1 week
+
+update-pom-version:
+  stage: test
+  script:
+    - mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=$CI_COMMIT_TAG
+    - mvn $MAVEN_CLI_OPTS versions:commit
+  artifacts:
+    paths:
+      - pom.xml
+    expire_in: 1 hour
+  rules:
+    - if: '$CI_COMMIT_TAG'
+
+package:
+  stage: package
+  script:
+    - mvn $MAVEN_CLI_OPTS clean package -DskipTests
+  artifacts:
+    paths:
+      - target/*.jar
+      - Dockerfile
+      - .dockerignore
+    expire_in: 1 hour
+  needs:
+    - unit-test
+    - integration-test
+    - job: update-pom-version
+      optional: true
+
+.build-docker-image:
+  stage: build
+  needs:
+    - package
+  image:
+    name: gcr.io/kaniko-project/executor:v1.23.2-debug
+    entrypoint: [ "" ]
+  dependencies:
+    - package
+  before_script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+  script:
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}:${DOCKER_TAG}"
+      --cache=true
+      --cache-repo="${CI_REGISTRY_IMAGE}/cache"
+
+build-docker-image-dev:
+  extends: .build-docker-image
+  variables:
+    DOCKER_TAG: "dev"
+  rules:
+    - if: '$CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH'
+
+build-docker-image-main:
+  extends: .build-docker-image
+  variables:
+    DOCKER_TAG: "latest"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+build-docker-image-tag:
+  extends: .build-docker-image
+  variables:
+    DOCKER_TAG: "$CI_COMMIT_TAG"
+  rules:
+    - if: '$CI_COMMIT_TAG'
