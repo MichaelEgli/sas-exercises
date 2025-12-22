@@ -1,0 +1,12 @@
+{
+  "isbn": "1234567890",
+  "title": "Mismatched ISBN Book",
+  "authors": "Some Author",
+  "publisher": "Some Publisher",
+  "publishedYear": 2024,
+  "pages": 250,
+  "description": "description",
+  "imageUrl": null,
+  "price": 30.00
+}
+

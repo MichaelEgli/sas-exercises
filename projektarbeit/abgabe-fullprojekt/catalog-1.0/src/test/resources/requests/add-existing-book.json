@@ -1,0 +1,12 @@
+{
+  "isbn": "9780134682020",
+  "title": "Effective Java",
+  "authors": "Joshua Bloch",
+  "publisher": "Addison-Wesley Professional",
+  "publishedYear": 2018,
+  "pages": 416,
+  "description": "A comprehensive guide to best practices in Java programming.",
+  "imageUrl": null,
+  "price": 40.00
+}
+

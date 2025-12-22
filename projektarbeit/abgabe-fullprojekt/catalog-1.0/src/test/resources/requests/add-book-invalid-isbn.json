@@ -1,0 +1,12 @@
+{
+  "isbn": "123",
+  "title": "Test Book",
+  "authors": "Test Author",
+  "publisher": "Test Publisher",
+  "publishedYear": 2024,
+  "pages": 300,
+  "description": "description",
+  "imageUrl": null,
+  "price": 20.39
+}
+

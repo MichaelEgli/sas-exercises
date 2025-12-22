@@ -1,0 +1,34 @@
+# Maven build artifacts (keep target/ for the JAR file)
+.m2/
+
+# Git
+.git/
+.gitignore
+.gitlab-ci.yml
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# Documentation
+README.md
+HELP.md
+*.md
+
+# Docker
+.dockerignore
+
+# Test files
+src/test/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+

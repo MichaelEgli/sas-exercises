@@ -1,0 +1,12 @@
+{
+  "isbn": "9999999999",
+  "title": "Non-Existent Book",
+  "authors": "Unknown Author",
+  "publisher": "Unknown Publisher",
+  "publishedYear": 2024,
+  "pages": 200,
+  "description": "description",
+  "imageUrl": null,
+  "price": 10.00
+}
+
