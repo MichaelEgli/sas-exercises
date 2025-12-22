@@ -1,0 +1,78 @@
+---
+name: bookstore6
+
+services:
+  bookdb:
+    image: postgres:17.6-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - bookdb:/var/lib/postgresql/data
+    ports:
+      - "5001:5432"
+
+  catalog:
+    image: registry.gitlab.ti.bfh.ch/cas-sad-hs25/project/bookstore6/catalog:1.0
+    depends_on:
+      - bookdb
+    environment:
+      - SERVER_PORT=8001
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://bookdb:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    ports:
+      - "8001:8001"
+
+  orderdb:
+    image: postgres:17.6-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - orderdb:/var/lib/postgresql/data
+    ports:
+      - "5002:5432"
+
+  activemq:
+    image: apache/activemq-classic:6.2.0
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+    environment:
+      - ACTIVEMQ_ADMIN_LOGIN=admin
+      - ACTIVEMQ_ADMIN_PASSWORD=admin
+    restart: unless-stopped
+
+  order:
+    image: registry.gitlab.ti.bfh.ch/cas-sad-hs25/project/bookstore6/order:1.0
+    depends_on:
+      - orderdb
+      - activemq
+    environment:
+      - SERVER_PORT=8002
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://orderdb:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_ACTIVEMQ_BROKERURL=tcp://activemq:61616
+      - BOOKSTORE_CATALOG_APIURL=http://catalog:8001/books
+      - BOOKSTORE_SHIPPING_ORDERQUEUE=ShippingOrderQueue
+      - BOOKSTORE_SHIPPING_CANCELQUEUE=ShippingCancelQueue
+      - BOOKSTORE_SHIPPING_INFOQUEUE=ShippingInfoQueue
+    ports:
+      - "8002:8002"
+
+  shipping:
+    image: registry.gitlab.ti.bfh.ch/cas-sad-hs25/project/bookstore6/shipping:1.0
+    depends_on:
+      - activemq
+    environment:
+      - SPRING_ACTIVEMQ_BROKERURL=tcp://activemq:61616
+      - BOOKSTORE_SHIPPING_ORDERQUEUE=ShippingOrderQueue
+      - BOOKSTORE_SHIPPING_CANCELQUEUE=ShippingCancelQueue
+      - BOOKSTORE_SHIPPING_INFOQUEUE=ShippingInfoQueue
+      - BOOKSTORE_SHIPPING_PROCESSINGTIME=30000
+
+volumes:
+  bookdb: { }
+  orderdb: { }
