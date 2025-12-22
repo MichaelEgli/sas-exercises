@@ -1,0 +1,13 @@
+{
+  "firstName": "John",
+  "lastName": "Smith",
+  "email": "test@example.org",
+  "address": null,
+  "creditCard": {
+    "type": "MASTER_CARD",
+    "number": "5400000000000005",
+    "expirationMonth": 1,
+    "expirationYear": 2030
+  }
+}
+

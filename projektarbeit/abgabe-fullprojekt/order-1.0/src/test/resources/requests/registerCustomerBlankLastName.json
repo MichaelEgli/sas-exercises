@@ -1,0 +1,19 @@
+{
+  "firstName": "John",
+  "lastName": "",
+  "email": "test@example.org",
+  "address": {
+    "street": "123 Maple Street",
+    "city": "Mill Valley",
+    "stateProvince": "CA",
+    "postalCode": "90952",
+    "country": "US"
+  },
+  "creditCard": {
+    "type": "MASTER_CARD",
+    "number": "5400000000000005",
+    "expirationMonth": 1,
+    "expirationYear": 2030
+  }
+}
+

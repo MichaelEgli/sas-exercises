@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres:17.6-alpine
+    ports:
+       - "5002:5432"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=mydatabase
+    restart: unless-stopped
+
+  activemq:
+    image: apache/activemq-classic:6.2.0
+    ports:
+      - "61616:61616"  # OpenWire protocol (JMS)
+      - "8161:8161"    # Web Console
+    environment:
+      - ACTIVEMQ_ADMIN_LOGIN=admin
+      - ACTIVEMQ_ADMIN_PASSWORD=admin
+    volumes:
+      - activemq-data:/opt/apache-activemq/data
+    restart: unless-stopped
+
+volumes:
+  activemq-data:

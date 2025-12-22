@@ -1,0 +1,14 @@
+{
+  "firstName": "John",
+  "lastName": "Smith",
+  "email": "test@example.org",
+  "address": {
+    "street": "123 Maple Street",
+    "city": "Mill Valley",
+    "stateProvince": "CA",
+    "postalCode": "90952",
+    "country": "US"
+  },
+  "creditCard": null
+}
+
